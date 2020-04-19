@@ -1,3 +1,4 @@
+use indicatif::{ProgressBar, ProgressIterator, ProgressStyle};
 use std::io::prelude::*;
 
 fn main() -> Result<(), anyhow::Error> {
@@ -9,6 +10,11 @@ fn main() -> Result<(), anyhow::Error> {
     (0..HEIGHT)
         .rev()
         .flat_map(|y| (0..WIDTH).map(move |x| (x, y)))
+        .progress_with({
+            let t = "{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {pos:>7}/{len:7} ({eta})";
+            let s = ProgressStyle::default_bar().template(t);
+            ProgressBar::new(HEIGHT * WIDTH).with_style(s)
+        })
         .map(|(x, y)| {
             let r = x as f64 / WIDTH as f64;
             let g = y as f64 / HEIGHT as f64;
