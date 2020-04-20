@@ -36,8 +36,8 @@ fn ray_color(ray: Ray) -> Pixel {
 }
 
 fn main() -> Result<(), anyhow::Error> {
-    const WIDTH: u32 = 3840;
-    const HEIGHT: u32 = 2420;
+    const WIDTH: u32 = 2000;
+    const HEIGHT: u32 = 1000;
 
     let lower_left_corner = Vector3::new(-2.0, -1.0, -1.0);
     let horizontal = Vector3::new(4.0, 0.0, 0.0);
