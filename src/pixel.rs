@@ -33,3 +33,9 @@ impl Pixel {
         format!("{} {} {}\n", r, g, b)
     }
 }
+
+impl From<Vector3<f64>> for Pixel {
+    fn from(v: Vector3<f64>) -> Self {
+        Pixel(v)
+    }
+}
