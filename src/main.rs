@@ -2,6 +2,7 @@ use indicatif::{ProgressBar, ProgressIterator, ProgressStyle};
 use std::io::prelude::*;
 
 mod pixel;
+mod ray;
 
 fn main() -> Result<(), anyhow::Error> {
     const WIDTH: u64 = 200;
