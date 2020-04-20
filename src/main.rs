@@ -47,7 +47,7 @@ fn main() -> Result<(), anyhow::Error> {
         .into_par_iter()
         .rev()
         .progress_with({
-            let t = "{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {pos:>7}/{len:7} ({eta})";
+            let t = "{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {percent}% ({eta})";
             let s = ProgressStyle::default_bar().template(t);
             let len = HEIGHT as u64;
             ProgressBar::new(len).with_style(s)
