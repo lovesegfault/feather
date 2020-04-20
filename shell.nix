@@ -8,6 +8,8 @@ pkgs.mkShell {
     cmake
     pkgconfig
 
+    flamegraph
+    linuxPackages_latest.perf
     rust-analyzer
     cargo-edit
     niv
