@@ -46,17 +46,20 @@ fn main() -> Result<(), anyhow::Error> {
     let img: Vec<u8> = (0..HEIGHT)
         .into_par_iter()
         .rev()
-        .flat_map(|y| (0..WIDTH).into_par_iter().map(move |x| (x, y)))
         .progress_with({
             let t = "{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {pos:>7}/{len:7} ({eta})";
             let s = ProgressStyle::default_bar().template(t);
-            let len = (HEIGHT * WIDTH) as u64;
+            let len = HEIGHT as u64;
             ProgressBar::new(len).with_style(s)
         })
+        .flat_map(|y| (0..WIDTH).into_par_iter().map(move |x| (x, y)))
         .map(|(x, y)| {
             let u = x as f64 / WIDTH as f64;
             let v = y as f64 / HEIGHT as f64;
-            let r = Ray::new(Point3::origin(), lower_left_corner + u * horizontal + v * vertical);
+            let r = Ray::new(
+                Point3::origin(),
+                lower_left_corner + u * horizontal + v * vertical,
+            );
             ray_color(r)
         })
         .flat_map(|px| px.to_ppm_color().into_bytes())
