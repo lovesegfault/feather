@@ -1,6 +1,8 @@
 use indicatif::{ProgressBar, ProgressIterator, ProgressStyle};
 use std::io::prelude::*;
 
+mod pixel;
+
 fn main() -> Result<(), anyhow::Error> {
     const WIDTH: u64 = 200;
     const HEIGHT: u64 = 100;
@@ -16,15 +18,9 @@ fn main() -> Result<(), anyhow::Error> {
             ProgressBar::new(HEIGHT * WIDTH).with_style(s)
         })
         .map(|(x, y)| {
-            let r = x as f64 / WIDTH as f64;
-            let g = y as f64 / HEIGHT as f64;
-            let b = 0.2;
-            let ir = (255.999 * r) as u64;
-            let ig = (255.999 * g) as u64;
-            let ib = (255.999 * b) as u64;
-            (ir, ig, ib)
+            pixel::Pixel::new(x as f64 / WIDTH as f64, y as f64 / HEIGHT as f64,0.2)
         })
-        .map(|(r, g, b)| write!(file, "{} {} {}\n", r, g, b))
+        .map(|px| file.write(px.to_ppm_color().as_bytes()).map(drop))
         .collect::<Result<_, _>>()?;
 
     Ok(())
