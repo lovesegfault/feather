@@ -41,6 +41,8 @@ fn main() -> Result<(), anyhow::Error> {
     const WIDTH: usize = 2000;
     const HEIGHT: usize = 1000;
 
+    pretty_env_logger::init();
+
     let lower_left_corner = Vector3::new(-2.0, -1.0, -1.0);
     let horizontal = Vector3::new(4.0, 0.0, 0.0);
     let vertical = Vector3::new(0.0, 2.0, 0.0);
