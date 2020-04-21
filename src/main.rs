@@ -3,7 +3,6 @@ mod ray;
 use pixel::Pixel;
 use ray::Ray;
 
-use indicatif::{ParallelProgressIterator, ProgressBar, ProgressStyle};
 use nalgebra::Point3;
 use nalgebra::Vector3;
 use rayon::prelude::*;
@@ -36,36 +35,24 @@ fn ray_color(ray: Ray) -> Pixel {
 }
 
 fn main() -> Result<(), anyhow::Error> {
-    const WIDTH: u32 = 2000;
-    const HEIGHT: u32 = 1000;
+    const WIDTH: usize = 2000;
+    const HEIGHT: usize = 1000;
 
     let lower_left_corner = Vector3::new(-2.0, -1.0, -1.0);
     let horizontal = Vector3::new(4.0, 0.0, 0.0);
     let vertical = Vector3::new(0.0, 2.0, 0.0);
 
-    let mut img: Vec<Pixel> = Vec::with_capacity((WIDTH * HEIGHT) as usize);
-    img.par_extend(
-        (0..HEIGHT)
-            .into_par_iter()
-            .rev()
-            .progress_with({
-                let t =
-                    "{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {percent}% ({eta})";
-                let s = ProgressStyle::default_bar().template(t);
-                let len = HEIGHT as u64;
-                ProgressBar::new(len).with_style(s)
-            })
-            .flat_map(|y| (0..WIDTH).into_par_iter().map(move |x| (x, y)))
-            .map(|(x, y)| {
-                let u = x as f64 / WIDTH as f64;
-                let v = y as f64 / HEIGHT as f64;
-                let r = Ray::new(
-                    Point3::origin(),
-                    lower_left_corner + u * horizontal + v * vertical,
-                );
-                ray_color(r)
-            }),
-    );
+    let mut img: Vec<Pixel> = vec![Pixel::default(); WIDTH * HEIGHT];
+    img.par_iter_mut().enumerate().for_each(|(i, px)| {
+        let (x, y) = (i % WIDTH, HEIGHT - i / WIDTH + 1);
+        let u = x as f64 / WIDTH as f64;
+        let v = y as f64 / HEIGHT as f64;
+        let r = Ray::new(
+            Point3::origin(),
+            lower_left_corner + u * horizontal + v * vertical,
+        );
+        *px = ray_color(r);
+    });
 
     let mut file = std::fs::File::create("image.ppm")?;
     write!(file, "P3\n{} {}\n255\n", WIDTH, HEIGHT)?;

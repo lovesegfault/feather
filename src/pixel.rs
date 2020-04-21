@@ -1,11 +1,18 @@
 use nalgebra::Vector3;
 
+#[derive(Clone)]
 pub struct Pixel(Vector3<f64>);
 
 impl std::ops::Deref for Pixel {
     type Target = Vector3<f64>;
     fn deref(&self) -> &Self::Target {
         &self.0
+    }
+}
+
+impl Default for Pixel {
+    fn default() -> Self {
+        Pixel(Vector3::new(0.0, 0.0, 0.0))
     }
 }
 
