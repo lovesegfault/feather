@@ -2,7 +2,6 @@ use crate::hittable::HitRecord;
 use crate::hittable::Hittable;
 use crate::ray::Ray;
 use nalgebra::{Point3, Vector3};
-use std::ops::RangeInclusive;
 
 pub struct Sphere {
     pub center: Point3<f64>,
