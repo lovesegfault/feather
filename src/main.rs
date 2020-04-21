@@ -12,13 +12,13 @@ use std::io::prelude::*;
 fn hit_sphere(center: Point3<f64>, radius: f64, ray: &Ray) -> f64 {
     let oc = ray.origin - center;
     let a = ray.direction.norm_squared();
-    let b = 2.0 * oc.dot(&ray.direction);
+    let half_b = oc.dot(&ray.direction);
     let c = oc.norm_squared() - radius.powi(2);
-    let discriminant = b.powi(2) - (4.0 * a * c);
+    let discriminant = half_b.powi(2) - (a * c);
     if discriminant < 0.0 {
         -1.0
     } else {
-        (-b - discriminant.sqrt()) / (2.0 * a)
+        (-half_b - discriminant.sqrt()) / a
     }
 }
 
