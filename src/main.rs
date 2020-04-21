@@ -43,31 +43,35 @@ fn main() -> Result<(), anyhow::Error> {
     let horizontal = Vector3::new(4.0, 0.0, 0.0);
     let vertical = Vector3::new(0.0, 2.0, 0.0);
 
-    let img: Vec<u8> = (0..HEIGHT)
-        .into_par_iter()
-        .rev()
-        .progress_with({
-            let t = "{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {percent}% ({eta})";
-            let s = ProgressStyle::default_bar().template(t);
-            let len = HEIGHT as u64;
-            ProgressBar::new(len).with_style(s)
-        })
-        .flat_map(|y| (0..WIDTH).into_par_iter().map(move |x| (x, y)))
-        .map(|(x, y)| {
-            let u = x as f64 / WIDTH as f64;
-            let v = y as f64 / HEIGHT as f64;
-            let r = Ray::new(
-                Point3::origin(),
-                lower_left_corner + u * horizontal + v * vertical,
-            );
-            ray_color(r)
-        })
-        .flat_map(|px| px.to_ppm_color().into_bytes())
-        .collect();
+    let mut img: Vec<Pixel> = Vec::with_capacity((WIDTH * HEIGHT) as usize);
+    img.par_extend(
+        (0..HEIGHT)
+            .into_par_iter()
+            .rev()
+            .progress_with({
+                let t =
+                    "{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {percent}% ({eta})";
+                let s = ProgressStyle::default_bar().template(t);
+                let len = HEIGHT as u64;
+                ProgressBar::new(len).with_style(s)
+            })
+            .flat_map(|y| (0..WIDTH).into_par_iter().map(move |x| (x, y)))
+            .map(|(x, y)| {
+                let u = x as f64 / WIDTH as f64;
+                let v = y as f64 / HEIGHT as f64;
+                let r = Ray::new(
+                    Point3::origin(),
+                    lower_left_corner + u * horizontal + v * vertical,
+                );
+                ray_color(r)
+            }),
+    );
 
     let mut file = std::fs::File::create("image.ppm")?;
     write!(file, "P3\n{} {}\n255\n", WIDTH, HEIGHT)?;
-    file.write(&img)?;
+    img.into_iter()
+        .map(|px| file.write(&px.to_ppm_color().into_bytes()).map(drop))
+        .collect::<Result<_, _>>()?;
 
     Ok(())
 }
