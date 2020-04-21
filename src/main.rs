@@ -1,3 +1,4 @@
+mod hittable;
 mod pixel;
 mod ray;
 use pixel::Pixel;
