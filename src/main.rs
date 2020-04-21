@@ -1,6 +1,7 @@
 mod hittable;
 mod pixel;
 mod ray;
+mod sphere;
 use pixel::Pixel;
 use ray::Ray;
 
