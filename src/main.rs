@@ -5,6 +5,7 @@ mod sphere;
 use pixel::Pixel;
 use ray::Ray;
 
+use indicatif::{ParallelProgressIterator, ProgressBar, ProgressStyle};
 use nalgebra::Point3;
 use nalgebra::Vector3;
 use rayon::prelude::*;
@@ -45,16 +46,27 @@ fn main() -> Result<(), anyhow::Error> {
     let vertical = Vector3::new(0.0, 2.0, 0.0);
 
     let mut img: Vec<Pixel> = vec![Pixel::default(); WIDTH * HEIGHT];
-    img.par_iter_mut().enumerate().for_each(|(i, px)| {
-        let (x, y) = (i % WIDTH, HEIGHT - i / WIDTH + 1);
-        let u = x as f64 / WIDTH as f64;
-        let v = y as f64 / HEIGHT as f64;
-        let r = Ray::new(
-            Point3::origin(),
-            lower_left_corner + u * horizontal + v * vertical,
-        );
-        *px = ray_color(r);
-    });
+    img.par_iter_mut()
+        .enumerate()
+        // FIXME: indicatif is really slow. To the point where most of the time is spent drawing
+        // this cursed bar. pbr is an alternative, but the API sucks and it won't work with how I'm
+        // using Rayon.
+        .progress_with({
+            let t = "{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {percent}% ({eta})";
+            let s = ProgressStyle::default_bar().template(t);
+            let len = (HEIGHT * WIDTH) as u64;
+            ProgressBar::new(len).with_style(s)
+        })
+        .for_each(|(i, px)| {
+            let (x, y) = (i % WIDTH, HEIGHT - i / WIDTH + 1);
+            let u = x as f64 / WIDTH as f64;
+            let v = y as f64 / HEIGHT as f64;
+            let r = Ray::new(
+                Point3::origin(),
+                lower_left_corner + u * horizontal + v * vertical,
+            );
+            *px = ray_color(r);
+        });
 
     let mut file = std::fs::File::create("image.ppm")?;
     write!(file, "P3\n{} {}\n255\n", WIDTH, HEIGHT)?;
