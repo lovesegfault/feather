@@ -5,8 +5,8 @@ pkgs.mkShell {
   name = "rayzor";
   nativeBuildInputs = with pkgs; [
     cargo
-    cmake
-    pkgconfig
+    llvmPackages_latest.clang
+    llvmPackages_latest.lld
 
     rust-analyzer
     cargo-edit
