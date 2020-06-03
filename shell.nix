@@ -2,7 +2,7 @@ let
   pkgs = import ./nix {};
 in
 pkgs.mkShell {
-  name = "rayzor";
+  name = "feather";
   nativeBuildInputs = with pkgs; [
     cargo
     llvmPackages_latest.clang
